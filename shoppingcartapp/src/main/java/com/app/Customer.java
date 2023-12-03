@@ -1,6 +1,8 @@
 package com.app;
 
-public class Customer 
+import javax.swing.JFrame;
+
+public class Customer extends JFrame
 {
     
 }

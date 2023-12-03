@@ -1,6 +1,8 @@
 package com.app;
 
-public class Seller 
+import javax.swing.JFrame;
+
+public class Seller extends JFrame
 {
     
 }

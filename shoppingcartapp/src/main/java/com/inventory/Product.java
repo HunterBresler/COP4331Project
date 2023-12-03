@@ -1,6 +1,8 @@
 package com.inventory;
 
-public class Product 
+import javax.swing.JFrame;
+
+public class Product extends JFrame
 {
     
 }
