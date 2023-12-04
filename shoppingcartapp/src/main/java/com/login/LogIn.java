@@ -1,122 +1,116 @@
-package com.login;
-
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
-import java.awt.*;
 
 public class LogIn extends JFrame {
-    // Database map to store username and password pairs
+    // Database to store username and password pairs.
     private Map<String, String> db = new HashMap<>();
-    // Components of the login UI
-    private JComboBox<String> roleComboBox; // Dropdown for selecting user role
-    private JTextField userTextField; // Text field for inputting username
-    private JPasswordField passwordField; // Password field for inputting password
-    private JToggleButton showPasswordButton; // Button to toggle password visibility
-    private JLabel statusLabel; // Label to show login status messages
+    
+    // UI components for the login screen.
+    private JComboBox<String> roleComboBox; // Dropdown to select user role.
+    private JTextField userTextField; // Field for entering username.
+    private JPasswordField passwordField; // Field for entering password.
+    private JToggleButton showPasswordButton; // Button to toggle password visibility.
+    private JLabel statusLabel; // Label to display login status messages.
 
-    // Constructor
+    // Constructor sets up the UI and initializes the database.
     public LogIn() {
-        readDB(); // Initialize the database with user credentials
-        initializeUI(); // Setup the user interface
+        readDB(); // Load user credentials into the database.
+        initializeUI(); // Initialize and setup the user interface.
     }
 
-    // Initializes the user interface
+    // Initializes the user interface.
     private void initializeUI() {
-        setTitle("Shopping Cart Login"); // Title of the login window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Operation on close
-        setSize(400, 250); // Size of the login window
-        setLocationRelativeTo(null); // Center the window on screen
+        setTitle("Shopping Cart Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 250); // Adjust size to fit all components.
+        setLocationRelativeTo(null); // Center the window on screen.
 
-        setLayout(new BorderLayout()); // Layout manager for the frame
-        add(createMainPanel(), BorderLayout.CENTER); // Add main panel to the frame
-        add(createBottomPanel(), BorderLayout.SOUTH); // Add bottom panel to the frame
+        setLayout(new BorderLayout());
+        add(createMainPanel(), BorderLayout.CENTER); // Add main panel with form fields.
+        add(createBottomPanel(), BorderLayout.SOUTH); // Add bottom panel with login button.
 
-        setVisible(true); // Make the frame visible
+        setVisible(true);
     }
 
-    // Creates the main panel with role selection, username, and password fields
+    // Creates the main panel with form fields for user input.
     private JPanel createMainPanel() {
-        JPanel mainPanel = new JPanel(new GridBagLayout()); // Using GridBagLayout for flexible component placement
-        GridBagConstraints gbc = new GridBagConstraints(); // Constraints for component placement
-        gbc.insets = new Insets(4, 4, 4, 4); // Margins around components
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 4, 4, 4);
 
-        // Role selection combo box
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 1;
-        mainPanel.add(new JLabel("Role:"), gbc); // Role label
-        roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"}); // Dropdown for role
+        // Role selection combo box setup.
+        gbc.gridx = 0; gbc.gridy = 0;
+        mainPanel.add(new JLabel("Role:"), gbc);
+        roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"});
         gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth = 2;
-        mainPanel.add(roleComboBox, gbc); // Add role combo box to panel
+        mainPanel.add(roleComboBox, gbc);
 
-        // Username field
+        // Username input field setup.
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
-        mainPanel.add(new JLabel("Username:"), gbc); // Username label
+        mainPanel.add(new JLabel("Username:"), gbc);
         userTextField = new JTextField(15);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 1;
-        mainPanel.add(userTextField, gbc); // Add username text field to panel
+        gbc.gridx = 1; gbc.gridy = 1;
+        mainPanel.add(userTextField, gbc);
 
-        // Password field and show password button
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
-        mainPanel.add(new JLabel("Password:"), gbc); // Password label
+        // Password input field and show/hide password button.
+        gbc.gridx = 0; gbc.gridy = 2;
+        mainPanel.add(new JLabel("Password:"), gbc);
         passwordField = new JPasswordField(15);
         gbc.gridx = 1; gbc.gridy = 2;
-        mainPanel.add(passwordField, gbc); // Add password field to panel
-        showPasswordButton = new JToggleButton("👀"); // Button to toggle password visibility
+        mainPanel.add(passwordField, gbc);
+        showPasswordButton = new JToggleButton("👀");
         showPasswordButton.setPreferredSize(new Dimension(60, 20));
-        showPasswordButton.addActionListener(e -> togglePasswordVisibility()); // Listener to toggle visibility
+        showPasswordButton.addActionListener(e -> togglePasswordVisibility());
         gbc.gridx = 2; gbc.gridy = 2;
-        mainPanel.add(showPasswordButton, gbc); // Add show password button to panel
+        mainPanel.add(showPasswordButton, gbc);
 
         return mainPanel;
     }
 
-    // Toggles the visibility of the password in the password field
+    // Toggle the visibility of the password in the password field.
     private void togglePasswordVisibility() {
-        if (showPasswordButton.isSelected()) {
-            passwordField.setEchoChar((char) 0); // Show password
-        } else {
-            passwordField.setEchoChar('•'); // Hide password
-        }
+        passwordField.setEchoChar(showPasswordButton.isSelected() ? (char) 0 : '•');
     }
 
-    // Creates the bottom panel with login button and status label
+    // Creates the bottom panel with the login button.
     private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JButton loginButton = new JButton("Login"); // Login button
-        loginButton.addActionListener(e -> processLogin()); // Action listener for login process
-        statusLabel = new JLabel(); // Label to display status messages
-        statusLabel.setForeground(Color.RED); // Color for error messages
-        bottomPanel.add(loginButton); // Add login button to panel
-        bottomPanel.add(statusLabel); // Add status label to panel
+        JButton loginButton = new JButton("Login");
+        loginButton.addActionListener(e -> processLogin());
+        statusLabel = new JLabel();
+        statusLabel.setForeground(Color.RED);
+        bottomPanel.add(loginButton);
+        bottomPanel.add(statusLabel);
         return bottomPanel;
     }
 
-    // Processes login credentials when login button is clicked
+    // Processes login credentials when the login button is clicked.
     private void processLogin() {
-        String role = (String) roleComboBox.getSelectedItem(); // Get selected role
-        String username = userTextField.getText(); // Get entered username
-        String password = new String(passwordField.getPassword()); // Get entered password
+        String role = (String) roleComboBox.getSelectedItem();
+        String username = userTextField.getText();
+        String password = new String(passwordField.getPassword());
         if (checkLogIn(username, password)) {
-            statusLabel.setText("Login successful as " + role); // Display success message
-            // Additional logic for different roles can be added here
+            statusLabel.setText("Login successful as " + role);
         } else {
-            statusLabel.setText("Invalid username or password"); // Display error message
+            statusLabel.setText("Invalid username or password");
         }
     }
 
-    // Initializes the database with sample data (placeholder for actual database logic)
+    // Initializes the database with sample data.
     private void readDB() {
-        db.put("user1", "pass1"); // Sample user credential
-        db.put("user2", "pass2"); // Another sample user credential
+        db.put("user1", "pass1");
+        db.put("user2", "pass2");
     }
 
-    // Checks login credentials against the database
+    // Checks login credentials against the database.
     private boolean checkLogIn(String username, String password) {
-        return password.equals(db.get(username)); // Returns true if credentials match
+        return password.equals(db.get(username));
     }
 
-    // Main method to run the application
+    // Main method to run the application.
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new LogIn()); // Ensures GUI is created in the Event Dispatch Thread
+        SwingUtilities.invokeLater(() -> new LogIn());
     }
 }
