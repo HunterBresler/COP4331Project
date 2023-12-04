@@ -2,94 +2,110 @@ package com.login;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.JFrame;
+import javax.swing.*;
+import java.awt.*;
 
-public class LogIn extends JFrame 
-{
-    private Map<String, String> db = new HashMap<>(); // database for login credentials
-    private boolean correctLogIn = false; // tracks whether there has been a successful login
+public class LogIn extends JFrame {
+    private Map<String, String> db = new HashMap<>();
+    private JComboBox<String> roleComboBox;
+    private JTextField userTextField;
+    private JPasswordField passwordField;
+    private JToggleButton showPasswordButton;
+    private JLabel statusLabel;
 
-    // constructor
-    public LogIn()
-    {
-        // Fill db
+    public LogIn() {
         readDB();
-        showLogInFrame();
+        initializeUI();
     }
-    
-    public void showLogInFrame()
-    {
-        String user = "";
 
-        // Show frame
+    private void initializeUI() {
+        setTitle("Shopping Cart Login");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 250); // Adjusted size to accommodate new components
+        setLocationRelativeTo(null);
 
-        while(correctLogIn == false)
-        {
-            // Get correct login credentials
-            user = inputLogIn();
+        setLayout(new BorderLayout());
+        add(createMainPanel(), BorderLayout.CENTER);
+        add(createBottomPanel(), BorderLayout.SOUTH);
+
+        setVisible(true);
+    }
+
+    private JPanel createMainPanel() {
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 4, 4, 4);
+
+        // Role selection combo box
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+        mainPanel.add(new JLabel("Role:"), gbc);
+        roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"});
+        gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth = 2;
+        mainPanel.add(roleComboBox, gbc);
+
+        // Username field
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        mainPanel.add(new JLabel("Username:"), gbc);
+        userTextField = new JTextField(15);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.gridwidth = 1;
+        mainPanel.add(userTextField, gbc);
+
+        // Password field and show password button
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
+        mainPanel.add(new JLabel("Password:"), gbc);
+        passwordField = new JPasswordField(15);
+        gbc.gridx = 1; gbc.gridy = 2;
+        mainPanel.add(passwordField, gbc);
+        showPasswordButton = new JToggleButton("👀");
+        showPasswordButton.setPreferredSize(new Dimension(60, 20));
+        showPasswordButton.addActionListener(e -> togglePasswordVisibility());
+        gbc.gridx = 2; gbc.gridy = 2;
+        mainPanel.add(showPasswordButton, gbc);
+
+        return mainPanel;
+    }
+
+    private void togglePasswordVisibility() {
+        if (showPasswordButton.isSelected()) {
+            passwordField.setEchoChar((char) 0);
+        } else {
+            passwordField.setEchoChar('•');
         }
-
-        // Close frame
-
-        // Create user
-        createUser(user);
     }
 
-    // Reads db.txt and writes it into db variable
-    public void readDB()
-    {
-        
+    private JPanel createBottomPanel() {
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton loginButton = new JButton("Login");
+        loginButton.addActionListener(e -> processLogin());
+        statusLabel = new JLabel();
+        statusLabel.setForeground(Color.RED);
+        bottomPanel.add(loginButton);
+        bottomPanel.add(statusLabel);
+        return bottomPanel;
     }
 
-    // Get input for login and return true if valid
-    public String inputLogIn()
-    {
-        // Get input
-        String user = "temp";
-
-        // check and validate login
-        if (checkLogIn("temp", "temp"))
-        {
-            correctLogIn = true;
-        }
-
-        return user;
-    }
-
-    // Check if login credentials match db
-    public boolean checkLogIn(String username, String password)
-    {
-        // if password = password associated with username
-        if (password == db.get(username)) 
-        {
-            return true;
-        } 
-        else 
-        {
-            return false;
+    private void processLogin() {
+        String role = (String) roleComboBox.getSelectedItem();
+        String username = userTextField.getText();
+        String password = new String(passwordField.getPassword());
+        if (checkLogIn(username, password)) {
+            statusLabel.setText("Login successful as " + role);
+            // Here, you can add logic to handle different roles differently
+        } else {
+            statusLabel.setText("Invalid username or password");
         }
     }
-    // Displays invalid Username or Password
-    public void showError()
-    {
 
+    private void readDB() {
+        db.put("user1", "pass1");
+        db.put("user2", "pass2");
     }
 
-    public void createUser(String user)
-    {
-        // Open selection
-        String classSelection = inputClass();
-
-        // Create class based on class selection
-
-        // Open shopping cart for specified user
+    private boolean checkLogIn(String username, String password) {
+        return password.equals(db.get(username));
     }
 
-    public String inputClass()
-    {
-        // Get selection
-        String selection = "temp";
-
-        return selection;
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new LogIn());
     }
 }
