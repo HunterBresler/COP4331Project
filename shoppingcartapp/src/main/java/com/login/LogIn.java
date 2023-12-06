@@ -1,7 +1,18 @@
+package com.login;
+
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.*;
+
+import com.inventory.Inventory;
+import com.inventory.Product;
 
 public class LogIn extends JFrame {
     // Database to store username and password pairs.
@@ -16,6 +27,9 @@ public class LogIn extends JFrame {
 
     // Constructor sets up the UI and initializes the database.
     public LogIn() {
+        //db.put("user1", "pass1");
+        //db.put("user2", "pass2");
+        //writeCredentialsToFile();
         readDB(); // Load user credentials into the database.
         initializeUI(); // Initialize and setup the user interface.
     }
@@ -98,11 +112,42 @@ public class LogIn extends JFrame {
         }
     }
 
-    // Initializes the database with sample data.
-    private void readDB() {
-        db.put("user1", "pass1");
-        db.put("user2", "pass2");
+    // Initializes the db from db.txt
+    private void readDB() 
+    {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("db.txt"))) 
+        {
+            Object obj = inputStream.readObject();
+
+            if (obj instanceof Map) 
+            {
+                this.db = (Map<String, String>) obj;
+            } 
+            else 
+            {
+                System.out.println("Invalid format in db.txt");
+            }
+        } 
+        catch (IOException | ClassNotFoundException e) 
+        {
+            e.printStackTrace();
+        }
     }
+
+    // Method to write credentials to a text file
+    public void writeCredentialsToFile() 
+    {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("db.txt"))) 
+        {
+            outputStream.writeObject(db);
+            System.out.println("Credentials written to db.txt");
+        } 
+        catch (IOException e) 
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     // Checks login credentials against the database.
     private boolean checkLogIn(String username, String password) {

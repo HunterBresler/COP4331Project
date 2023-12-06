@@ -2,5 +2,6 @@
     "java.project.sourcePaths": [
         "src_draft\\main\\java",
         "shoppingcartapp\\src\\main\\java"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
