@@ -135,7 +135,7 @@ public class LogIn extends JFrame {
     }
 
     // Method to write credentials to a text file
-    public void writeCredentialsToFile() 
+    public void writeDB() 
     {
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("db.txt"))) 
         {
