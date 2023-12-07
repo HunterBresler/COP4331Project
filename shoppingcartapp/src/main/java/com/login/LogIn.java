@@ -3,6 +3,7 @@ package com.login;
 import com.app.Customer;
 import com.app.SellerController;
 import com.app.SellerView;
+import com.app.SellerModel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -124,12 +125,25 @@ public class LogIn extends JFrame {
     }
 
     // Opens the Seller dashboard.
-    private void openSellerDashboard() {
+private void openSellerDashboard() {
     this.dispose();
-    SellerController sellerController = new SellerController();
+
+    // Create the model
+    SellerModel sellerModel = new SellerModel("SellerName", "InventoryFileName.txt");
+
+    // Create the controller with the model
+    SellerController sellerController = new SellerController(sellerModel);
+
+    // Create the view and pass the controller to it
     SellerView sellerView = new SellerView(sellerController);
-    sellerView.showFrame();  // Show the internal frame of SellerView
+
+    // Link the view with the controller
+    sellerController.setView(sellerView);
+
+    // Show the seller dashboard
+    sellerView.showFrame();
 }
+    
     // Initializes the db from db.txt
     private void readDB() {
         try (BufferedReader reader = new BufferedReader(new FileReader("db.txt"))) {
