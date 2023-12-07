@@ -8,44 +8,67 @@ public class SellerView implements SellerObserver {
     private JTextArea inventoryTextArea;
     private final JFrame frame;
     private final JLabel label;
-    private final SellerController controller;
+    private SellerController controller;
+    private JLabel profitLabel;
 
     public SellerView(SellerController controller) {
         this.controller = controller;
         this.label = new JLabel("Inventory Currently in Stock");
         this.frame = new JFrame();
-        frame.setTitle("Seller View: " );
+        frame.setTitle("Seller View");
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create components
         inventoryTextArea = new JTextArea();
         inventoryTextArea.setEditable(false);
+        
+        profitLabel = new JLabel();
+        frame.add(profitLabel, BorderLayout.SOUTH);
 
-        JButton updateInventoryButton = new JButton("Update Inventory");
-        updateInventoryButton.addActionListener(e -> showUpdateInventoryDialog());
+        // Buttons for inventory management
+        JButton addProductButton = new JButton("Add Product");
+        addProductButton.addActionListener(e -> showAddUpdateProductDialog(false));
+
+        JButton updateProductButton = new JButton("Update Product");
+        updateProductButton.addActionListener(e -> showAddUpdateProductDialog(true));
+
+        // Layout for buttons
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(addProductButton);
+        buttonPanel.add(updateProductButton);
 
         frame.setLayout(new BorderLayout());
         frame.add(label, BorderLayout.NORTH);
         frame.add(new JScrollPane(inventoryTextArea), BorderLayout.CENTER);
-        frame.add(updateInventoryButton, BorderLayout.SOUTH);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
 
         // Load inventory initially
         updateInventoryText();
     }
 
     private void updateInventoryText() {
+        if (controller == null) {
+            System.out.println("SellerView: updateInventoryText called but controller is null");
+            return;
+        }
         inventoryTextArea.setText("");
         List<String> products = controller.getProducts();
         for (String product : products) {
             inventoryTextArea.append(product + "\n");
         }
     }
+    
+    public void updateProfitDisplay(double cost, double revenue, double profit) {
+        profitLabel.setText("Cost: " + cost + ", Revenue: " + revenue + ", Profit: " + profit);
+    }
 
-    private void showUpdateInventoryDialog() {
-        String newProduct = JOptionPane.showInputDialog(frame, "Enter new product:");
-        if (newProduct != null && !newProduct.trim().isEmpty()) {
-            controller.addToInventory(newProduct.trim());
+    private void showAddUpdateProductDialog(boolean isUpdate) {
+        String dialogTitle = isUpdate ? "Update Product" : "Add Product";
+        String productDetails = JOptionPane.showInputDialog(frame, "Enter product details (id,name,quantity,invoicePrice,sellingPrice):", dialogTitle, JOptionPane.PLAIN_MESSAGE);
+
+        if (productDetails != null && !productDetails.trim().isEmpty()) {
+            controller.addOrUpdateProduct(productDetails.trim(), isUpdate);
             updateInventoryText();
         }
     }
@@ -59,8 +82,8 @@ public class SellerView implements SellerObserver {
         frame.setVisible(true);
     }
 
-    // Additional methods from the SellerController class
-    public List<String> getProducts() {
-        return controller.getProducts();
+    public void setController(SellerController controller) {
+        this.controller = controller;
+        updateInventoryText(); // Refresh the inventory text when a new controller is set
     }
 }
