@@ -1,5 +1,6 @@
 package com.app;
 
+import com.inventory.Product;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -9,154 +10,102 @@ import java.util.Map;
 
 public class Customer extends JFrame {
     private final List<Product> products = new ArrayList<>();
-    private final ShoppingCart cart = new ShoppingCart();
-    private final JPanel cartPanel = new JPanel();
-    private final JPanel itemListPanel = new JPanel(); // Panel for item list
+    private final Map<Integer, Product> productCatalog = new HashMap<>();
+    private final Cart cart;
+    private final JPanel productsPanel = new JPanel();
 
     public Customer() {
-        initializeProducts();
+        initializeProductCatalog();
+        cart = new Cart(productCatalog);  // Initialize Cart with product catalog
         initializeUI();
     }
 
-    private void initializeProducts() {
-        for (int i = 0; i < 10; i++) {
-            products.add(new Product("Product " + (i + 1), (i + 1) * 10));
+    private void initializeProductCatalog() {
+        // Initialize product catalog
+        for (int i = 1; i <= 10; i++) {
+            Product product = new Product(i, "Product " + i, "Description", 100, 5.0, i * 10.0);
+            products.add(product);
+            productCatalog.put(i, product);  // Add product to the catalog
         }
     }
 
     private void initializeUI() {
-    setTitle("Customer Dashboard");
-    setSize(1280, 720);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLocationRelativeTo(null);
+        setTitle("Customer Dashboard");
+        setSize(1280, 720);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-    setLayout(new BorderLayout(10, 10));
-    add(createProductPanel(), BorderLayout.CENTER);
-
-    cartPanel.setLayout(new BorderLayout());
-    cartPanel.setBorder(BorderFactory.createTitledBorder("Shopping Cart"));
-    cartPanel.setPreferredSize(new Dimension(300, cartPanel.getPreferredSize().height)); // Set preferred width
-
-    itemListPanel.setLayout(new BoxLayout(itemListPanel, BoxLayout.Y_AXIS));
-    JScrollPane scrollPane = new JScrollPane(itemListPanel); // Wrap item list in a scrollable pane
-    cartPanel.add(scrollPane, BorderLayout.CENTER);
-    add(cartPanel, BorderLayout.EAST);
-
-    updateCartView();
-    setVisible(true);
-}
-
-
-    private JPanel createProductPanel() {
-        JPanel productPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-        productPanel.setBorder(BorderFactory.createTitledBorder("Available Products"));
-
+        productsPanel.setLayout(new GridLayout(0, 2, 10, 10));
         for (Product product : products) {
-            JButton productButton = new JButton(product.getName() + " - $" + product.getPrice());
+            JButton productButton = new JButton(product.getProductName() + " - $" + product.getSellingPrice());
             productButton.addActionListener(e -> {
-                cart.addProduct(product);
+                cart.addOrUpdateProduct(product.getProductID(), 1);  // Use product ID
                 updateCartView();
             });
-            productPanel.add(productButton);
+            productsPanel.add(productButton);
         }
 
-        return productPanel;
+        add(productsPanel, BorderLayout.CENTER);
+
+        JButton cartButton = new JButton("View Cart");
+        cartButton.addActionListener(e -> displayCartContents());
+        add(cartButton, BorderLayout.NORTH);
+
+        setVisible(true);
     }
 
-        private void updateCartView() {
-        itemListPanel.removeAll();
-        cart.getProducts().forEach((product, quantity) -> itemListPanel.add(createCartItemPanel(product, quantity)));
-
-        JButton checkoutButton = new JButton("Checkout - Total: $" + cart.calculateTotal());
-        checkoutButton.addActionListener(e -> performCheckout());
-        cartPanel.add(checkoutButton, BorderLayout.SOUTH); // Checkout button at the bottom
-        itemListPanel.revalidate();
-        itemListPanel.repaint();
+    private void updateCartView() {
+        // Update the view to reflect changes in the cart
+        // Implement any necessary logic here
     }
 
+    private void displayCartContents() {
+    JFrame cartFrame = new JFrame("Shopping Cart");
+    cartFrame.setSize(400, 300);
+    cartFrame.setLayout(new BorderLayout());
 
-    private JPanel createCartItemPanel(Product product, int quantity) {
-    JPanel itemPanel = new JPanel();
-    itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
-    itemPanel.add(new JLabel(product.getName() + " - $" + product.getPrice() + " x "));
+    JPanel cartItemsPanel = new JPanel();
+    cartItemsPanel.setLayout(new BoxLayout(cartItemsPanel, BoxLayout.Y_AXIS));
+    JScrollPane scrollPane = new JScrollPane(cartItemsPanel);
 
-    JSpinner quantitySpinner = new JSpinner(new SpinnerNumberModel((int) quantity, 1, 100, 1));
-    Dimension spinnerSize = new Dimension(60, 20); // Set preferred size dimensions
-    quantitySpinner.setPreferredSize(spinnerSize);
-    quantitySpinner.setMinimumSize(spinnerSize);
-    quantitySpinner.setMaximumSize(spinnerSize); // Ensure the spinner adheres to these dimensions
+    JButton checkoutButton = new JButton("Checkout - Total: $" + cart.calculateTotal());
+    checkoutButton.addActionListener(e -> JOptionPane.showMessageDialog(cartFrame, "Checkout completed. Total cost: $" + cart.calculateTotal()));
 
-    quantitySpinner.addChangeListener(e -> {
-        int newQuantity = (int) quantitySpinner.getValue();
-        cart.updateProductQuantity(product, newQuantity);
-        updateCartView();
-    });
-    itemPanel.add(quantitySpinner);
+    for (Map.Entry<Product, Integer> entry : cart.getCartContents().entrySet()) {
+        Product product = entry.getKey();
+        int quantity = entry.getValue();
 
-    JButton removeButton = new JButton("Remove");
-    removeButton.addActionListener(e -> {
-        cart.removeProduct(product);
-        updateCartView();
-    });
-    itemPanel.add(removeButton);
+        JPanel itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        itemPanel.add(new JLabel(product.getProductName() + " - $" + product.getSellingPrice()));
 
-    return itemPanel;
+        JSpinner quantitySpinner = new JSpinner(new SpinnerNumberModel(quantity, 0, 100, 1));
+        quantitySpinner.addChangeListener(e -> {
+            int newQuantity = (Integer) quantitySpinner.getValue();
+            cart.updateProductQuantity(product.getProductID(), newQuantity);
+            checkoutButton.setText("Checkout - Total: $" + cart.calculateTotal()); // Update the checkout total
+        });
+        itemPanel.add(quantitySpinner);
+
+        JButton removeButton = new JButton("Remove");
+        removeButton.addActionListener(e -> {
+            cart.removeProduct(product.getProductID());
+            cartItemsPanel.remove(itemPanel);
+            cartItemsPanel.revalidate();
+            cartItemsPanel.repaint();
+            checkoutButton.setText("Checkout - Total: $" + cart.calculateTotal()); // Update the checkout total
+        });
+        itemPanel.add(removeButton);
+
+        cartItemsPanel.add(itemPanel);
+    }
+
+    cartFrame.add(scrollPane, BorderLayout.CENTER);
+    cartFrame.add(checkoutButton, BorderLayout.SOUTH);
+
+    cartFrame.setVisible(true);
 }
-
-    private void performCheckout() {
-        JOptionPane.showMessageDialog(this, "Checkout completed. Total cost: $" + cart.calculateTotal());
-        cart.clear();
-        updateCartView();
-    }
 
     public static void main(String[] args) {
         new Customer();
-    }
-}
-
-class Product {
-    private final String name;
-    private final double price;
-
-    public Product(String name, double price) {
-        this.name = name;
-        this.price = price;
-    }
-
-    public String getName() { return name; }
-    public double getPrice() { return price; }
-}
-
-class ShoppingCart {
-    private final Map<Product, Integer> productQuantities = new HashMap<>();
-
-    public void addProduct(Product product) {
-        productQuantities.put(product, productQuantities.getOrDefault(product, 0) + 1);
-    }
-
-    public void updateProductQuantity(Product product, int quantity) {
-        if (quantity <= 0) {
-            productQuantities.remove(product);
-        } else {
-            productQuantities.put(product, quantity);
-        }
-    }
-
-    public void removeProduct(Product product) {
-        productQuantities.remove(product);
-    }
-
-    public Map<Product, Integer> getProducts() {
-        return new HashMap<>(productQuantities);
-    }
-
-    public double calculateTotal() {
-        return productQuantities.entrySet().stream()
-                .mapToDouble(entry -> entry.getKey().getPrice() * entry.getValue())
-                .sum();
-    }
-
-    public void clear() {
-        productQuantities.clear();
     }
 }
