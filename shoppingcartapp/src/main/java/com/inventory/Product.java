@@ -10,6 +10,7 @@ public class Product implements Serializable
     private int quantity;
     private double invoicePrice;
     private double sellingPrice;
+    private int soldQuantity;
 
     public Product(int ID, String name, String description, int quantity, double invoicePrice, double sellingPrice)
     {
@@ -19,6 +20,17 @@ public class Product implements Serializable
         this.quantity = quantity;
         this.invoicePrice = invoicePrice;
         this.sellingPrice = sellingPrice;
+    }
+    
+    // Method to record a sale
+    public void recordSale(int quantity) {
+        this.soldQuantity += quantity;
+        this.quantity -= quantity; // Assuming quantity is the stock quantity
+    }
+    
+    // Getter for soldQuantity
+    public int getSoldQuantity() {
+        return soldQuantity;
     }
 
     // Getter methods
