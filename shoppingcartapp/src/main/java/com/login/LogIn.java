@@ -1,7 +1,8 @@
 package com.login;
 
 import com.app.Customer;
-import com.app.Seller;
+import com.app.SellerController;
+import com.app.SellerView;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -124,10 +125,11 @@ public class LogIn extends JFrame {
 
     // Opens the Seller dashboard.
     private void openSellerDashboard() {
-        this.dispose();
-        new Seller().setVisible(true);
-    }
-
+    this.dispose();
+    SellerController sellerController = new SellerController();
+    SellerView sellerView = new SellerView(sellerController);
+    sellerView.showFrame();  // Show the internal frame of SellerView
+}
     // Initializes the db from db.txt
     private void readDB() {
         try (BufferedReader reader = new BufferedReader(new FileReader("db.txt"))) {
