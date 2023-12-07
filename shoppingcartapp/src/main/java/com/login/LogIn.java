@@ -1,24 +1,18 @@
 package com.login;
 
-import java.awt.*;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import javax.swing.*;
-
 import com.app.Customer;
-import com.inventory.Inventory;
-import com.inventory.Product;
+import com.app.Seller;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LogIn extends JFrame {
     // Database to store username and password pairs.
-    private Map<String, String> db = new HashMap<>();
-    
+    private Map<String, UserCredentials> db = new HashMap<>();
+
     // UI components for the login screen.
     private JComboBox<String> roleComboBox; // Dropdown to select user role.
     private JTextField userTextField; // Field for entering username.
@@ -28,9 +22,6 @@ public class LogIn extends JFrame {
 
     // Constructor sets up the UI and initializes the database.
     public LogIn() {
-        db.put("user1", "pass1");
-        db.put("user2", "pass2");
-        //writeCredentialsToFile();
         readDB(); // Load user credentials into the database.
         initializeUI(); // Initialize and setup the user interface.
     }
@@ -49,53 +40,56 @@ public class LogIn extends JFrame {
         setVisible(true);
     }
 
-    // Creates the main panel with form fields for user input.
     private JPanel createMainPanel() {
         JPanel mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(4, 4, 4, 4);
 
-        // Role selection combo box setup.
-        gbc.gridx = 0; gbc.gridy = 3;
-        mainPanel.add(new JLabel("Role:"), gbc);
-        roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"});
-        gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 1;
-        mainPanel.add(roleComboBox, gbc);
-
         // Username input field setup.
-        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
+        gbc.gridx = 0; gbc.gridy = 0;
         mainPanel.add(new JLabel("Username:"), gbc);
         userTextField = new JTextField(15);
-        gbc.gridx = 1; gbc.gridy = 1;
+        gbc.gridx = 1; gbc.gridy = 0;
         mainPanel.add(userTextField, gbc);
 
         // Password input field and show/hide password button.
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; gbc.gridy = 1;
         mainPanel.add(new JLabel("Password:"), gbc);
         passwordField = new JPasswordField(15);
-        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.gridx = 1; gbc.gridy = 1;
         mainPanel.add(passwordField, gbc);
         showPasswordButton = new JToggleButton("👀");
         showPasswordButton.setPreferredSize(new Dimension(60, 20));
         showPasswordButton.addActionListener(e -> togglePasswordVisibility());
-        gbc.gridx = 2; gbc.gridy = 2;
+        gbc.gridx = 2; gbc.gridy = 1;
         mainPanel.add(showPasswordButton, gbc);
-        
-        
+
+        // Role selection combo box setup.
+        gbc.gridx = 0; gbc.gridy = 2;
+        mainPanel.add(new JLabel("Role:"), gbc);
+        roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"});
+        gbc.gridx = 1; gbc.gridy = 2;
+        mainPanel.add(roleComboBox, gbc);
 
         return mainPanel;
     }
 
     // Toggle the visibility of the password in the password field.
     private void togglePasswordVisibility() {
-        passwordField.setEchoChar(showPasswordButton.isSelected() ? (char) 0 : '•');
+        if (showPasswordButton.isSelected()) {
+            passwordField.setEchoChar((char) 0); // Password will be visible
+            showPasswordButton.setText("👁️");
+        } else {
+            passwordField.setEchoChar('•'); // Password will be hidden
+            showPasswordButton.setText("👀");
+        }
     }
 
     // Creates the bottom panel with the login button.
     private JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton loginButton = new JButton("Login");
-        loginButton.addActionListener(e -> processLogin());
+        loginButton.addActionListener(this::processLogin);
         statusLabel = new JLabel();
         statusLabel.setForeground(Color.RED);
         bottomPanel.add(loginButton);
@@ -104,71 +98,82 @@ public class LogIn extends JFrame {
     }
 
     // Processes login credentials when the login button is clicked.
-    private void processLogin() {
+    private void processLogin(ActionEvent e) {
         String role = (String) roleComboBox.getSelectedItem();
         String username = userTextField.getText();
-    String password = new String(passwordField.getPassword());
-    if (checkLogIn(username, password) && "Customer".equals(role)) {
-        statusLabel.setText("Login successful as " + role);
-        openCustomerDashboard();
-    } else {
-        statusLabel.setText("Invalid username or password");
+        String password = new String(passwordField.getPassword());
+        UserCredentials credentials = db.get(username + ":" + role);
+
+        if (credentials != null && credentials.getPassword().equals(password)) {
+            statusLabel.setText("Login successful as " + role);
+            if ("Seller".equals(role)) {
+                openSellerDashboard();
+            } else {
+                openCustomerDashboard();
+            }
+        } else {
+            statusLabel.setText("Invalid username or password");
+        }
     }
-}
 
+    // Opens the Customer dashboard.
     private void openCustomerDashboard() {
-    // Close the current login window
         this.dispose();
+        new Customer().setVisible(true);
+    }
 
-    // Open the Customer dashboard
-    Customer customerDashboard = new Customer();
-    customerDashboard.setVisible(true);
-}
+    // Opens the Seller dashboard.
+    private void openSellerDashboard() {
+        this.dispose();
+        new Seller().setVisible(true);
+    }
 
     // Initializes the db from db.txt
-    private void readDB() 
-    {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream("db.txt"))) 
-        {
-            Object obj = inputStream.readObject();
-
-            if (obj instanceof Map) 
-            {
-                this.db = (Map<String, String>) obj;
-            } 
-            else 
-            {
-                System.out.println("Invalid format in db.txt");
+    private void readDB() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("db.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 3) {
+                    String username = parts[0];
+                    String password = parts[1];
+                    String role = parts[2];
+                    db.put(username + ":" + role, new UserCredentials(username, password, role));
+                } else {
+                    System.out.println("Invalid line format in db.txt: " + line);
+                }
             }
-        } 
-        catch (IOException | ClassNotFoundException e) 
-        {
+        } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Error reading db.txt");
         }
     }
 
-    // Method to write credentials to a text file
-    public void writeDB() 
-    {
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("db.txt"))) 
-        {
-            outputStream.writeObject(db);
-            System.out.println("Credentials written to db.txt");
-        } 
-        catch (IOException e) 
-        {
-            e.printStackTrace();
-        }
-    }
-
-
-    // Checks login credentials against the database.
-    private boolean checkLogIn(String username, String password) {
-        return password.equals(db.get(username));
-    }
-
-    // Main method to run the application.
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new LogIn());
+    }
+}
+
+class UserCredentials {
+    private String username;
+    private String password;
+    private String role;
+
+    public UserCredentials(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getRole() {
+        return role;
     }
 }
