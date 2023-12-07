@@ -1,11 +1,15 @@
+package com.app;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.app.SellerObserver;
+
 public class SellerModel {
     private String sellerName;
     private List<String> products;
-    private List<Observer> observers = new ArrayList<>();
+    private List<SellerObserver> observers = new ArrayList<>();
     private String inventoryFileName;
 
     public SellerModel(String sellerName, String inventoryFileName) {
@@ -60,17 +64,17 @@ public class SellerModel {
     }
     
     
-    public void addObserver(Observer observer) {
+    public void addObserver(SellerObserver observer) {
         observers.add(observer);
     }
     
-    public void removeObserver(Observer observer) {
+    public void removeObserver(SellerObserver observer) {
         observers.remove(observer);
     }
 
     
     private void notifyObservers(String productDetails) {
-        for (Observer observer : observers) {
+        for (SellerObserver observer : observers) {
             observer.notify(productDetails);
         }
     }
