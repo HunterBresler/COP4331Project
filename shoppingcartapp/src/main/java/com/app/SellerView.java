@@ -1,3 +1,5 @@
+package com.app;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -15,45 +17,50 @@ public class SellerView implements SellerObserver {
         frame.setTitle("Seller View: " );
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.add(label);
 
         // Create components
         inventoryTextArea = new JTextArea();
         inventoryTextArea.setEditable(false);
 
         JButton updateInventoryButton = new JButton("Update Inventory");
-//        updateInventoryButton.addActionListener(e -> showUpdateInventoryDialog());
+        updateInventoryButton.addActionListener(e -> showUpdateInventoryDialog());
 
         frame.setLayout(new BorderLayout());
-
+        frame.add(label, BorderLayout.NORTH);
         frame.add(new JScrollPane(inventoryTextArea), BorderLayout.CENTER);
         frame.add(updateInventoryButton, BorderLayout.SOUTH);
 
         // Load inventory initially
-//        updateInventoryText();
-
-        frame.setVisible(true);
+        updateInventoryText();
     }
 
-//    private void updateInventoryText() {
-//        inventoryTextArea.setText("");
-//        List<String> products = model.getProducts();
-//        for (String product : products) {
-//            inventoryTextArea.append(product + "\n");
-//        }
-//    }
-//
-//    private void showUpdateInventoryDialog() {
-//        String newProduct = JOptionPane.showInputDialog(this, "Enter new product:");
-//        if (newProduct != null && !newProduct.trim().isEmpty()) {
-//            model.addToInventory(newProduct.trim());
-//            updateInventoryText();
-//        }
-//    }
+    private void updateInventoryText() {
+        inventoryTextArea.setText("");
+        List<String> products = controller.getProducts();
+        for (String product : products) {
+            inventoryTextArea.append(product + "\n");
+        }
+    }
+
+    private void showUpdateInventoryDialog() {
+        String newProduct = JOptionPane.showInputDialog(frame, "Enter new product:");
+        if (newProduct != null && !newProduct.trim().isEmpty()) {
+            controller.addToInventory(newProduct.trim());
+            updateInventoryText();
+        }
+    }
 
     @Override
     public void notify(String productDetails) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        updateInventoryText(); // Update the inventory list when notified
     }
-    
+
+    public void showFrame() {
+        frame.setVisible(true);
+    }
+
+    // Additional methods from the SellerController class
+    public List<String> getProducts() {
+        return controller.getProducts();
+    }
 }
