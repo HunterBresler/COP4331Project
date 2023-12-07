@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class SellerView implements Observer {
+public class SellerView implements SellerObserver {
     private JTextArea inventoryTextArea;
     private final JFrame frame;
     private final JLabel label;
@@ -55,4 +55,5 @@ public class SellerView implements Observer {
     public void notify(String productDetails) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
 }
