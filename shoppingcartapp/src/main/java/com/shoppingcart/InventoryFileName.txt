@@ -1,0 +1,5 @@
+1,Laptop,High-performance laptop,50,700.00,1000.00
+2,Smartphone,Latest model smartphone,100,300.00,500.00
+3,Headphones,Noise-cancelling headphones,150,50.00,100.00
+4,Smartwatch,Waterproof smartwatch,80,100.00,200.00
+5,Camera,DSLR camera,30,400.00,700.00
