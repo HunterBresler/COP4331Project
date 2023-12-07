@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.*;
 
+import com.app.Customer;
 import com.inventory.Inventory;
 import com.inventory.Product;
 
@@ -27,8 +28,8 @@ public class LogIn extends JFrame {
 
     // Constructor sets up the UI and initializes the database.
     public LogIn() {
-        //db.put("user1", "pass1");
-        //db.put("user2", "pass2");
+        db.put("user1", "pass1");
+        db.put("user2", "pass2");
         //writeCredentialsToFile();
         readDB(); // Load user credentials into the database.
         initializeUI(); // Initialize and setup the user interface.
@@ -55,10 +56,10 @@ public class LogIn extends JFrame {
         gbc.insets = new Insets(4, 4, 4, 4);
 
         // Role selection combo box setup.
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0; gbc.gridy = 3;
         mainPanel.add(new JLabel("Role:"), gbc);
         roleComboBox = new JComboBox<>(new String[]{"Customer", "Seller"});
-        gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth = 2;
+        gbc.gridx = 1; gbc.gridy = 3; gbc.gridwidth = 1;
         mainPanel.add(roleComboBox, gbc);
 
         // Username input field setup.
@@ -79,6 +80,8 @@ public class LogIn extends JFrame {
         showPasswordButton.addActionListener(e -> togglePasswordVisibility());
         gbc.gridx = 2; gbc.gridy = 2;
         mainPanel.add(showPasswordButton, gbc);
+        
+        
 
         return mainPanel;
     }
@@ -104,13 +107,23 @@ public class LogIn extends JFrame {
     private void processLogin() {
         String role = (String) roleComboBox.getSelectedItem();
         String username = userTextField.getText();
-        String password = new String(passwordField.getPassword());
-        if (checkLogIn(username, password)) {
-            statusLabel.setText("Login successful as " + role);
-        } else {
-            statusLabel.setText("Invalid username or password");
-        }
+    String password = new String(passwordField.getPassword());
+    if (checkLogIn(username, password) && "Customer".equals(role)) {
+        statusLabel.setText("Login successful as " + role);
+        openCustomerDashboard();
+    } else {
+        statusLabel.setText("Invalid username or password");
     }
+}
+
+    private void openCustomerDashboard() {
+    // Close the current login window
+        this.dispose();
+
+    // Open the Customer dashboard
+    Customer customerDashboard = new Customer();
+    customerDashboard.setVisible(true);
+}
 
     // Initializes the db from db.txt
     private void readDB() 
