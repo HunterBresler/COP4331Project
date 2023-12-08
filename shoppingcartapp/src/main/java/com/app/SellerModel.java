@@ -36,14 +36,22 @@ public class SellerModel {
     }
     
     private void updateProduct(String productId, String productName, int quantity, double invoicePrice, double sellingPrice) {
-        // Logic to update the product in inventory
-        // ...
+        for (String p : products) {
+            String[] details = p.split(",");
+            String pID = details[0].trim();
+            if (Integer.parseInt(productId) == Integer.parseInt(pID)) {
+                p = productId + "," + productName + "," + quantity + "," + invoicePrice + "," + sellingPrice;
+                notifyObservers(p);
+                saveInventory();
+            }
+        }
+        
         System.out.println("Updated product: " + productId);
     }
 
     private void addNewProduct(String productId, String productName, int quantity, double invoicePrice, double sellingPrice) {
-        // Logic to add the new product to inventory
-        // ...
+        String product = productId + "," + productName + "," + quantity + "," + invoicePrice + "," + sellingPrice;
+        addToInventory(product);
         System.out.println("Added new product: " + productId);
     }
 
@@ -67,6 +75,52 @@ private void loadInventory() {
     }
 }
 
+public void changeInventory(int id, String name, int quantity, double invoicePrice, double sellingPrice) {
+    // Read the existing content of the file
+    List<String> lines = new ArrayList<>();
+
+    try (BufferedReader reader = new BufferedReader(new FileReader(inventoryFileName))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            lines.add(line);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        return;
+    }
+
+    // Update the line corresponding to the specified id
+    boolean idFound = false;
+    for (int i = 0; i < lines.size(); i++) {
+        String[] parts = lines.get(i).split(",");
+        int existingId = Integer.parseInt(parts[0].trim());
+
+        if (existingId == id) {
+            // Update the line with the new values
+            lines.set(i, id + "," + name + "," + quantity + "," + invoicePrice + "," + sellingPrice);
+            idFound = true;
+            break;
+        }
+    }
+
+    // If the id is not found, add a new line
+    if (!idFound) {
+        String newLine = id + "," + name + "," + quantity + "," + invoicePrice + "," + sellingPrice;
+        lines.add(newLine);
+    }
+
+    // Write the updated content back to the file
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(inventoryFileName))) {
+        for (String line : lines) {
+            writer.write(line);
+            writer.newLine();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+
 private void saveInventory() {
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(inventoryFileName))) {
         for (String product : products) {
@@ -86,7 +140,19 @@ private void saveInventory() {
     }
 
     public void deleteFromInventory(String productDetails) {
-        products.removeIf(product -> product.contains(productDetails));
+        String[] details = productDetails.split(",");
+        String productId = details[0].trim();
+        String toRemove = "";
+        for (String p : products) {
+            String[] dP = p.split(",");
+            System.out.println(productId + " : " + dP[0].trim());
+            if (Integer.parseInt(productId) == Integer.parseInt(dP[0].trim())) {
+                toRemove = p;
+                System.out.println("ferfefg");
+            }
+        }
+        products.remove(toRemove);
+        System.out.println(products);
         notifyObservers(productDetails);
         saveInventory();
     }
@@ -101,14 +167,15 @@ private void saveInventory() {
     List<Product> productList = new ArrayList<>();
     for (String productDetails : productsStringList) {
         String[] details = productDetails.split(",");
-        int productId = Integer.parseInt(details[0].trim());
+        // Assuming details format: id,name,quantity,invoicePrice,sellingPrice
+        String productId = details[0].trim();
         String productName = details[1].trim();
-        String description = details[2].trim();
-        int quantity = Integer.parseInt(details[3].trim());
-        double invoicePrice = Double.parseDouble(details[4].trim());
-        double sellingPrice = Double.parseDouble(details[5].trim());
+        int quantity = Integer.parseInt(details[2].trim());
+        double invoicePrice = Double.parseDouble(details[3].trim());
+        double sellingPrice = Double.parseDouble(details[4].trim());
 
-        Product product = new Product(productId, productName, description, quantity, invoicePrice, sellingPrice);
+        //t(int ID, String name, String description, int quantity, double invoicePrice, double sellingPrice)
+        Product product = new Product(Integer.parseInt(productId), productName, "", quantity, invoicePrice, sellingPrice);
         productList.add(product);
     }
     return productList;

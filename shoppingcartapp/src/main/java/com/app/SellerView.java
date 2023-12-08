@@ -1,5 +1,6 @@
 package com.app;
 
+import javax.security.auth.kerberos.KerberosCredMessage;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -16,12 +17,13 @@ public class SellerView implements SellerObserver {
         this.label = new JLabel("Inventory Currently in Stock");
         this.frame = new JFrame();
         frame.setTitle("Seller View");
-        frame.setSize(400, 300);
+        frame.setSize(600, 500);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create components
         inventoryTextArea = new JTextArea();
         inventoryTextArea.setEditable(false);
+
         
         profitLabel = new JLabel();
         frame.add(profitLabel, BorderLayout.SOUTH);
@@ -33,10 +35,15 @@ public class SellerView implements SellerObserver {
         JButton updateProductButton = new JButton("Update Product");
         updateProductButton.addActionListener(e -> showAddUpdateProductDialog(true));
 
+        JButton removeProductButton = new JButton("Remove Product");
+        removeProductButton.addActionListener(e -> showRemoveProductDialogue());
+
+
         // Layout for buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(addProductButton);
         buttonPanel.add(updateProductButton);
+        buttonPanel.add(removeProductButton);
 
         frame.setLayout(new BorderLayout());
         frame.add(label, BorderLayout.NORTH);
@@ -55,7 +62,16 @@ public class SellerView implements SellerObserver {
         inventoryTextArea.setText("");
         List<String> products = controller.getProducts();
         for (String product : products) {
-            inventoryTextArea.append(product + "\n");
+             // Split the details
+            String[] details = product.split(",");
+            // Assuming details format: id,name,quantity,invoicePrice,sellingPrice
+            String productId = details[0].trim();
+            String productName = details[1].trim();
+            int quantity = Integer.parseInt(details[2].trim());
+            double invoicePrice = Double.parseDouble(details[3].trim());
+            double sellingPrice = Double.parseDouble(details[4].trim());
+
+            inventoryTextArea.append("Name: " + productName + "\nQuantity: " + quantity + " \nSelling Price: " + sellingPrice + "\nID: " + productId + " \n" );
         }
     }
     
@@ -68,7 +84,17 @@ public class SellerView implements SellerObserver {
         String productDetails = JOptionPane.showInputDialog(frame, "Enter product details (id,name,quantity,invoicePrice,sellingPrice):", dialogTitle, JOptionPane.PLAIN_MESSAGE);
 
         if (productDetails != null && !productDetails.trim().isEmpty()) {
-            controller.addOrUpdateProduct(productDetails.trim(), isUpdate);
+            controller.addOrUpdateProduct(productDetails.trim(), isUpdate); // HERE is where the controller calls the model
+            updateInventoryText();
+        }
+    }
+
+     private void showRemoveProductDialogue() {
+        String dialogTitle = "Remove Product";
+        String productDetails = JOptionPane.showInputDialog(frame, "Enter product details (id,name,quantity,invoicePrice,sellingPrice):", dialogTitle, JOptionPane.PLAIN_MESSAGE);
+
+        if (productDetails != null && !productDetails.trim().isEmpty()) {
+            controller.deleteFromInventory(productDetails); // HERE is where the controller calls the model
             updateInventoryText();
         }
     }

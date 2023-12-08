@@ -4,7 +4,7 @@ import com.inventory.Product;
 import java.util.HashMap;
 import java.util.Map;
 
-class Cart {
+public class Cart {
     private final Map<Integer, Integer> productQuantities = new HashMap<>();
     private Map<Integer, Product> productCatalog; // Assuming a product catalog is available
 

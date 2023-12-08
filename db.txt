@@ -1,0 +1,5 @@
+user1:pass1:Customer
+user2:pass2:Customer
+seller1:pass1:Seller
+seller2:pass2:Seller
+
