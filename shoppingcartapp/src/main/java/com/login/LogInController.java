@@ -79,14 +79,19 @@ private void openCustomerDashboard() {
     view.dispose();
     
     // Create instances of CustomerModel and CustomerView
-    CustomerModel customerModel = new CustomerModel();
-    CustomerView customerView = new CustomerView();
+
     
     // Create a CustomerController and pass both the model and view
-    CustomerController customerController = new CustomerController(customerModel, customerView);
+    CustomerController customerController = new CustomerController();
+
+    CustomerModel customerModel = new CustomerModel();
+    CustomerView customerView = new CustomerView(customerController);
+
+    customerController.setModel(customerModel);
     
     // Set the view for the controller
     customerController.setView(customerView);
+    customerController.initController();
 
     // Make the CustomerView visible
     customerView.setVisible(true);

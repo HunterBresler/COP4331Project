@@ -27,10 +27,14 @@ public class CustomerController {
         initController();
     }
 
+    public CustomerController() {
+
+    }
+
     /**
      * Initializes the controller by setting up action listeners for the view components.
      */
-    private void initController() {
+    public void initController() {
         JButton returnToStoreButton = view.getReturnToStoreButton();
         returnToStoreButton.addActionListener(e -> returnToStore());
     }
@@ -91,6 +95,10 @@ public class CustomerController {
      */
     public CustomerModel getModel() {
         return model;
+    }
+
+    public void setModel(CustomerModel model) {
+        this.model = model;
     }
 
     /**
